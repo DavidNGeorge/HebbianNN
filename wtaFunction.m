@@ -15,23 +15,30 @@ function outA = wtaFunction(inA, NNparam)
 % added to wtaFunction which require more than one parameter, createNet
 % must be updated.
 %
-% David N. George, Dec 2017
+% David N. George, Jan 2018
 switch NNparam.wtaFunction
     case 'none'
         % No wta
         outA = inA;
+	case 'onoff'
+        % Simple binary function - most active unit set to 1, other units 
+        % set to 0
+        [~, maxIndex] = max(inA);
+        outA = zeros(1, size(inA, 2));
+        outA(maxIndex) = 1;
     case 'simple'
         % Simplest form possible - leave the most active alone, other units 
         % set to 0
         [maxActivation, maxIndex] = max(inA);
         outA = zeros(1, size(inA, 2));
         outA(maxIndex) = maxActivation;
-    case 'onoff'
-        % Simple binary function - most active unit set to 1, other units 
-        % set to 0
-        [~, maxIndex] = max(inA);
-        outA = zeros(1, size(inA, 2));
-        outA(maxIndex) = 1;
+	case 'simplenorm'
+        % Basically the same as simple, but activity across hidden layer 
+        % normalized before all but the most active unit are switched off
+        outA = inA.^NNparam.wtaParam / sum(inA.^NNparam.wtaParam);
+        [maxActivation, maxIndex] = max(outA);
+        outA = zeros(1, size(outA, 2));
+        outA(maxIndex) = maxActivation;
     case 'power'
         % This not really a wta function as such, but does introduce some
         % competition and thus enhance the contrast of the activation level 
